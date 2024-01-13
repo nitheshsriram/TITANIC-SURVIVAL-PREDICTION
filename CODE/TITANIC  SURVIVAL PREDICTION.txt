@@ -1,0 +1,75 @@
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+
+import os
+for dirname, _, filenames in os.walk('TITANIC.csv'):
+    for filename in filenames:
+        print(os.path.join(dirname, filename))
+
+# Load the dataset
+tt = pd.read_csv('TITANIC.csv')
+
+tt.head()
+
+tt.tail()
+
+tt.shape
+
+tt.describe()
+
+# Visualization libraries
+import plotly.express as px
+import seaborn as sns
+
+sns.countplot(x='Survived',data=tt)
+
+sns.countplot(x='Survived',hue='Sex',data=tt,palette='RdBu_r')
+
+sns.countplot(x='Survived',hue='Pclass',data=tt,palette='rainbow')
+
+tt['Age'].hist(bins=30,color='lightblue')
+
+sns.heatmap(tt.isnull(),yticklabels=False)
+
+px.box(tt,x='Pclass',y='Age',color='Pclass')
+
+# in the box plot age is factor of Pclass so we fill null values with meadian
+tt.loc[(tt['Pclass'] == 1) & (tt['Age'].isnull()), 'Age'] = 42
+tt.loc[(tt['Pclass'] == 2) & (tt['Age'].isnull()), 'Age'] = 26
+tt.loc[(tt['Pclass'] == 3) & (tt['Age'].isnull()), 'Age'] = 24
+
+tt=tt.drop(columns='Cabin')
+
+tt= tt.dropna()
+
+tt.head()
+
+sns.heatmap(tt.isnull(),yticklabels=False,cmap='viridis')
+
+tt['Age'] = tt['Age'].astype(int)
+tt['Fare'] = tt['Fare'].astype(int)
+
+# asign values to object using dictionary
+tt['Embarked'] = tt['Embarked'].map({'Q': 0,'S':1,'C':2}).astype(int)
+tt['Sex'] = tt['Sex'].map( {'female': 1,'male':0}).astype(int)
+
+#drop columns for using dataset
+ttn = tt.drop(['PassengerId','Name','Ticket'],axis = 1, inplace= True)
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+
+tt.head()
+
+x= tt.drop(['Survived'],axis=1)
+y= tt['Survived']
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=40)
+clf = DecisionTreeClassifier()
+clf.fit(x_train,y_train)
+
+from sklearn.metrics import accuracy_score
+#prediction on test data
+y_pred = clf.predict(x_test)
+#calculation
+acc = accuracy_score(y_test,y_pred)
+print('Accuracy:', acc)
